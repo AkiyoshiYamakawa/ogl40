@@ -18,7 +18,7 @@ public:
       This is called prior to every frame.  Use this
       to update your animation.
       */
-    virtual void update( float t, vec3 position ) = 0;
+    virtual void update( float t, int key ) = 0;
 
     /**
       Draw your scene.
