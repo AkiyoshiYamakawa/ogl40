@@ -1,6 +1,10 @@
-#include "sceneshadowmap.h"
 
+
+#include "sceneshadowmap.h"
+#include <GLFW/glfw3.h>
 #include <cstdio>
+#include <iostream>
+using namespace::std;
 
 #include "glutils.h"
 
@@ -27,6 +31,13 @@ void SceneShadowMap::initScene()
     glEnable(GL_DEPTH_TEST);
 
 	angle = glm::quarter_pi<float>();
+	horizontalAngle = glm::radians(45.0f);
+	verticalAngle   = glm::radians(45.0f);
+	radius = 10.0f;
+	position = vec3(0.0f, 1.0f, 0.0f); 
+	gacc = -9.8f;
+	velocity = vec3(0.0f , 0.0f , -10.0f );
+	cout << "velocity.z = " << velocity.z << endl;
 
     //teapot = new VBOTeapot(14, mat4(1.0f));
 	sphere = new VBOSphere(1.0f,15,15);
@@ -128,13 +139,105 @@ void SceneShadowMap::setupFBO()
 }
 
 //void SceneShadowMap::update( float t )
-void SceneShadowMap::update( float t, vec3 position0 )
+void SceneShadowMap::update( float t, int key )
 {
-  position = position0;
 
   float deltaT = t - tPrev;
   if(tPrev == 0.0f) deltaT = 0.0f;
   tPrev = t;
+
+		if (key == GLFW_KEY_0 ) {
+			velocity.y += gacc * deltaT ;    // v = axt
+			position.y += velocity.y*deltaT ; // y = vt
+			if( position.y <= 1.0f ) {
+				velocity.y = -0.6 * velocity.y ;
+				position.y = 1.0f;
+			}
+		}else 
+		if ( key == GLFW_KEY_1 ) {
+			velocity.y += gacc * deltaT ;     // v = axt
+			position.y += velocity.y*deltaT ; // y = vt
+			if( position.y <= 1.0f ) {
+				velocity.y = -0.9 * velocity.y ;
+				position.y = 1.0f;
+				velocity.z = 0.7 * velocity.z ;
+			}
+			position.z += velocity.z*deltaT ; // z = vt
+			if( position.z <= -4.0f ) {
+				velocity.z = -0.9*velocity.z ;
+				//position.z = -3.9f;
+				//position.z += velocity.z*deltaT ; // z = vt
+			}
+			//cout<< "vz = " << velocity.z << ", posz = " << position.z << endl;
+
+		} else {
+			velocity = vec3(0.0f, 0.0f, -10.0f);
+		}
+			
+  		if (key == GLFW_KEY_A ) {
+			position.x -= 0.01f;
+			if ( position.x < -4.0f ) {
+				position.x = -4.0f;
+			}
+		}
+		if (key == GLFW_KEY_D ) {
+			position.x += 0.01f;
+		}
+		if (key == GLFW_KEY_W ){
+			position.z -= 0.01f;
+			if ( position.z < -4.0f ) {
+				position.z = -4.0f;
+			}
+		}
+		if (key == GLFW_KEY_S ){
+			position.z += 0.01f;
+		}
+		if (key == GLFW_KEY_Q ){
+			position.y += 0.01f;
+		}
+		if (key == GLFW_KEY_E ){
+			position.y -= 0.01f;
+			if ( position.y < 1.0f ) {
+				position.y = 1.0f;
+			}
+
+		}
+		if (key == GLFW_KEY_PAGE_UP ){
+			radius += 0.01f;
+		}
+		if (key == GLFW_KEY_PAGE_DOWN ){
+			radius -= 0.01f;
+			if( radius <= 1.0f ) {
+				radius = 1.0f;
+			}
+		}
+		if ( key == GLFW_KEY_UP ){
+			verticalAngle += 0.005f;
+			if( verticalAngle >= glm::radians( 85.0f ) ) {
+				verticalAngle = glm::radians( 85.0f) ;
+			}
+		}
+		if ( key == GLFW_KEY_DOWN ){
+			verticalAngle -= 0.005f;
+			if( verticalAngle <= -glm::radians( 85.0f ) ) {
+				verticalAngle = -glm::radians( 85.0f) ;
+			}
+		}
+		if ( key == GLFW_KEY_LEFT ){
+			horizontalAngle += 0.005f;
+			if( horizontalAngle >= glm::radians(360.0f)) {;
+				horizontalAngle -= glm::radians(360.0f);
+			}
+		}
+		if ( key == GLFW_KEY_RIGHT ){
+			horizontalAngle -= 0.005f;
+			if( horizontalAngle <= -glm::radians(360.0f)) {;
+				horizontalAngle += glm::radians(360.0f);
+			}
+		}
+		cameraPos.x = radius * cos(verticalAngle) * cos(horizontalAngle);
+		cameraPos.y = radius * sin(verticalAngle) ;
+		cameraPos.z = radius * cos(verticalAngle) * sin(horizontalAngle);
 
   //angle += 0.2f * deltaT;
   if (angle > glm::two_pi<float>()) angle -= glm::two_pi<float>();
@@ -159,9 +262,12 @@ void SceneShadowMap::render()
 
     // Pass 2 (render)
     float c = 1.0f;
-    vec3 cameraPos(c * 11.5f * cos(angle),c * 7.0f,c * 11.5f * sin(angle));
-    view = glm::lookAt(cameraPos,vec3(0.0f),vec3(0.0f,1.0f,0.0f));
-    prog.setUniform("Light.Position", view * vec4(lightFrustum->getOrigin(),1.0f));
+    //vec3 cameraPos(c * 11.5f * cos(angle),c * 7.0f,c * 11.5f * sin(angle));
+    //view = glm::lookAt(cameraPos,vec3(0.0f),vec3(0.0f,1.0f,0.0f));
+	view = glm::lookAt(cameraPos,vec3(0.0f),vec3(0.0f,1.0f,0.0f));
+    //prog.setUniform("Light.Position", view * vec4(lightFrustum->getOrigin(),1.0f));
+    //prog.setUniform("Light.Position", view * vec4(lightFrustum->getOrigin(),5.0f));
+    prog.setUniform("Light.Position", view * vec4(lightFrustum->getOrigin(),0.0f));
     projection = glm::perspective(glm::radians(50.0f), (float)width/height, 0.1f, 100.0f);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -172,13 +278,13 @@ void SceneShadowMap::render()
     drawScene();
 
     // Uncomment to draw the light's frustum
-//    solidProg.use();
-//    solidProg.setUniform("Color", vec4(1.0f,0.0f,0.0f,1.0f));
-//    model = mat4(1.0f);
-//    mat4 mv = view * model;
-//    solidProg.setUniform("MVP", projection * mv);
-//    lightFrustum->render();
-//    glFinish();
+    //solidprog.use();
+    //solidprog.setuniform("color", vec4(1.0f,0.0f,0.0f,1.0f));
+    //model = mat4(1.0f);
+    //mat4 mv = view * model;
+    //solidprog.setuniform("mvp", projection * mv);
+    //lightfrustum->render();
+    //glfinish();
 }
 
 void SceneShadowMap::drawScene()

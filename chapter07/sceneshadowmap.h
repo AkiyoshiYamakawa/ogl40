@@ -37,6 +37,13 @@ private:
     mat4 shadowBias;
     float angle;
 	vec3 position;
+	float verticalAngle ;
+	float horizontalAngle ;
+	float radius ;
+	vec3 cameraPos;
+	vec3 velocity;
+	float gacc ;
+
 
     Frustum *lightFrustum;
 
@@ -51,8 +58,8 @@ public:
 
     void initScene();
 	//void update( float t );
-	void update( float t, vec3 position );
-    void render();
+	void update( float t, int key );
+    void render( );
     void resize(int, int);
 };
 

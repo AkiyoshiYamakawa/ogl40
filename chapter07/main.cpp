@@ -17,7 +17,8 @@
 Scene *scene;
 GLFWwindow *window;
 
-vec3  position = vec3( 0.0f, +1.0f, 0.0f );
+int key; // pushed key code
+
 
 string parseCLArgs(int argc, char ** argv);
 void printHelpInfo(const char *);
@@ -37,25 +38,50 @@ void initializeGL() {
 void mainLoop() {
 	while( ! glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE) ) {
 		GLUtils::checkForOpenGLError(__FILE__,__LINE__);
+		key = 0;
+		if (glfwGetKey( window, GLFW_KEY_0 ) == GLFW_PRESS){
+			key = GLFW_KEY_0;
+		}
+		if (glfwGetKey( window, GLFW_KEY_1 ) == GLFW_PRESS){
+			key = GLFW_KEY_1;
+		}
 		if (glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS){
-			position.x -= 0.001f;
+			key = GLFW_KEY_A;
 		}
 		if (glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS){
-			position.x += 0.001f;
+			key = GLFW_KEY_D;
 		}
 		if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS){
-			position.z -= 0.001f;
+			key = GLFW_KEY_W;
 		}
 		if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS){
-			position.z += 0.001f;
+			key = GLFW_KEY_S;
 		}
 		if (glfwGetKey( window, GLFW_KEY_Q ) == GLFW_PRESS){
-			position.y += 0.001f;
+			key = GLFW_KEY_Q;
 		}
 		if (glfwGetKey( window, GLFW_KEY_E ) == GLFW_PRESS){
-			position.y -= 0.001f;
+			key = GLFW_KEY_E;
 		}
-		scene->update(float(glfwGetTime()),position);
+		if ( glfwGetKey( window, GLFW_KEY_PAGE_UP ) == GLFW_PRESS ){
+			key = GLFW_KEY_PAGE_UP;
+		}
+		if ( glfwGetKey( window, GLFW_KEY_PAGE_DOWN ) == GLFW_PRESS ){
+			key = GLFW_KEY_PAGE_DOWN;
+		}
+		if ( glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS ){
+			key = GLFW_KEY_UP;
+		}
+		if ( glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS ){
+			key = GLFW_KEY_DOWN;
+		}
+		if ( glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS ){
+			key = GLFW_KEY_LEFT;
+		}
+		if ( glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS ){
+			key = GLFW_KEY_RIGHT;
+		}
+		scene->update(float(glfwGetTime()),key);
 		scene->render();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -122,15 +148,15 @@ string parseCLArgs(int argc, char ** argv) {
 	string recipe = argv[1];
 
 	if( recipe == "ao" ) {
-		scene = new SceneAo();
+		//scene = new SceneAo();
 	} else if( recipe == "jitter") {
-		scene = new SceneJitter();
+		//scene = new SceneJitter();
 	} else if( recipe == "pcf") {
-		scene = new ScenePcf();
+		//scene = new ScenePcf();
 	} else if( recipe == "shadow-map" ) {
 		scene = new SceneShadowMap();
-        } else if( recipe == "shadow-volume" ) {
-          scene = new SceneShadowVolume();
+    } else if( recipe == "shadow-volume" ) {
+          //scene = new SceneShadowVolume();
 	} else {
 		printf("Unknown recipe: %s\n", recipe.c_str());
 		printHelpInfo(argv[0]);
